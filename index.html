@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>عطاری حاج صفی</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial;background:#f6f5ec;color:#243b2c}
+header{background:#244d35;color:white;padding:25px 15px;text-align:center}
+header h1{margin:0 0 8px;font-size:27px}
+header p{margin:0;color:#dce9d8}
+nav{background:#356647;padding:12px;text-align:center}
+nav a{color:white;text-decoration:none;margin:8px}
+.container{max-width:900px;margin:auto;padding:15px}
+.search{width:100%;padding:13px;border:1px solid #ddd;border-radius:12px;font-size:16px}
+.categories{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+.categories button{border:0;border-radius:20px;background:#e0eadc;padding:10px 14px;color:#244d35}
+.categories button.active{background:#356647;color:white}
+.products{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.card{background:white;border-radius:14px;padding:15px;box-shadow:0 2px 8px #0001}
+.card .emoji{font-size:38px;text-align:center}
+.card h3{margin:8px 0}
+.price{color:#287447;font-weight:bold}
+.card button,.checkout button{background:#356647;color:white;border:0;border-radius:9px;padding:11px;width:100%;margin-top:10px}
+.cart{background:#fff;border-radius:14px;padding:15px;margin-top:20px}
+footer{text-align:center;padding:25px;color:#777}
+input,textarea{font-family:inherit}
+@media(min-width:600px){.products{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<header>
+<h1>🌿 عطاری حاج صفی</h1>
+<p>طبیعت، سلامتی و کیفیت</p>
+</header>
+<nav>
+<a href="#products">محصولات</a>
+<a href="#cart">سبد خرید 🛒</a>
+</nav>
+<div class="container">
+<h2>محصولات عطاری</h2>
+<input class="search" id="search" placeholder="🔍 جستجوی محصول..." oninput="render()">
+<div class="categories" id="categories"></div>
+<div class="products" id="products"></div>
+
+<div class="cart" id="cart">
+<h2>🛒 سبد خرید</h2>
+<div id="cartItems">سبد خرید خالی است.</div>
+<div id="total"></div>
+<div class="checkout" id="checkout"></div>
+</div>
+</div>
+<footer>🌱 عطاری حاج صفی</footer>
+<script>
+const items=[
+{id:1,name:"زعفران",cat:"ادویه",price:120000,unit:"گرم",emoji:"🌺"},
+{id:2,name:"گل گاوزبان",cat:"گیاهان",price:80000,unit:"100 گرم",emoji:"🌸"},
+{id:3,name:"چای سبز",cat:"دمنوش",price:65000,unit:"100 گرم",emoji:"🍵"},
+{id:4,name:"دارچین",cat:"ادویه",price:45000,unit:"100 گرم",emoji:"🪵"},
+{id:5,name:"عرق نعنا",cat:"عرقیات",price:50000,unit:"بطری",emoji:"🌿"},
+{id:6,name:"گلاب",cat:"عرقیات",price:70000,unit:"بطری",emoji:"🌹"},
+{id:7,name:"بابونه",cat:"گیاهان",price:55000,unit:"100 گرم",emoji:"🌼"},
+{id:8,name:"آویشن",cat:"گیاهان",price:40000,unit:"100 گرم",emoji:"🍃"}
+];
+let cart={};
+let category="همه";
+const cats=["همه","گیاهان","ادویه","دمنوش","عرقیات"];
+function makeCategories(){
+document.getElementById("categories").innerHTML=cats.map(c=>
+`<button class="${category===c?'active':''}" onclick="category='${c}';render()">${c}</button>`).join("");
+}
+function render(){
+makeCategories();
+let q=document.getElementById("search").value.trim();
+let filtered=items.filter(p=>(category==="همه"||p.cat===category)&&p.name.includes(q));
+document.getElementById("products").innerHTML=filtered.map(p=>
+`<div class="card"><div class="emoji">${p.emoji}</div>
+<h3>${p.name}</h3><div>${p.unit}</div>
+<div class="price">${p.price.toLocaleString("fa-IR")} تومان</div>
+<button onclick="add(${p.id})">افزودن به سبد</button></div>`).join("");
+renderCart();
+}
+function add(id){cart[id]=(cart[id]||0)+1;renderCart()}
+function change(id,n){cart[id]+=n;if(cart[id]<=0)delete cart[id];renderCart()}
+function renderCart(){
+let keys=Object.keys(cart);
+if(!keys.length){
+document.getElementById("cartItems").innerHTML="سبد خرید خالی است.";
+document.getElementById("total").innerHTML="";
+document.getElementById("checkout").innerHTML="";
+return;
+}
+let total=0;
+document.getElementById("cartItems").innerHTML=keys.map(id=>{
+let p=items.find(x=>x.id==id),sum=p.price*cart[id];total+=sum;
+return `<p>${p.name} — ${cart[id]} عدد
+<button onclick="change(${id},-1)">−</button>
+<button onclick="change(${id},1)">+</button>
+${sum.toLocaleString("fa-IR")} تومان</p>`;
+}).join("");
+document.getElementById("total").innerHTML=`<h3>جمع: ${total.toLocaleString("fa-IR")} تومان</h3>`;
+document.getElementById("checkout").innerHTML=`
+<h3>ثبت سفارش</h3>
+<input id="customer" placeholder="نام شما" style="width:100%;padding:12px;margin:5px 0">
+<input id="phone" placeholder="شماره تماس" style="width:100%;padding:12px;margin:5px 0">
+<textarea id="address" placeholder="آدرس و توضیحات سفارش" style="width:100%;padding:12px;margin:5px 0"></textarea>
+<button onclick="order()">ثبت سفارش</button>`;
+}
+function order(){
+let name=document.getElementById("customer").value;
+let phone=document.getElementById("phone").value;
+let address=document.getElementById("address").value;
+if(!name||!phone||!address){alert("لطفاً همه اطلاعات را وارد کنید.");return}
+let text="سفارش مشتری: "+name+"\\nتلفن: "+phone+"\\nآدرس: "+address+"\\n\\n";
+Object.keys(cart).forEach(id=>{
+let p=items.find(x=>x.id==id);
+text+=p.name+" × "+cart[id]+"\\n";
+});
+alert("سفارش شما آماده شد!\\n\\n"+text+"\\nاین نسخه آزمایشی است؛ سفارش هنوز به فروشنده ارسال نمی‌شود.");
+}
+render();
+</script>
+</body>
+  </html>
